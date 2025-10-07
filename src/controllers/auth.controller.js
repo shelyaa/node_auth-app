@@ -15,7 +15,7 @@ const register = async (req, res) => {
   };
 
   if (!name) {
-    throw ApiError.badRequest('Name is require');
+    throw ApiError.badRequest('Name is required');
   }
 
   if (errors.email || errors.password) {
@@ -26,7 +26,7 @@ const register = async (req, res) => {
 
   await userService.register(name, email, hashedPass);
 
-  res.send({ message: 'OK' });
+  res.sendStatus(201);
 };
 
 const activate = async (req, res) => {
@@ -39,37 +39,34 @@ const activate = async (req, res) => {
 
   user.activationToken = null;
   await user.save();
-  res.send(user);
+
+  return res.redirect(process.env.CLIENT_HOST + '/profile');
 };
 
 const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-      throw ApiError.badRequest('Email and password are required');
-    }
-
-    const user = await userService.findByEmail(email);
-
-    if (!user) {
-      throw ApiError.badRequest('No such user');
-    }
-
-    if (user.activationToken) {
-      throw ApiError.badRequest('Account is not activated');
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      throw ApiError.badRequest('Wrong password');
-    }
-
-    await generateTokens(res, user);
-  } catch (err) {
-    throw err;
+  if (!email || !password) {
+    throw ApiError.badRequest('Email and password are required');
   }
+
+  const user = await userService.findByEmail(email);
+
+  if (!user) {
+    throw ApiError.badRequest('No such user');
+  }
+
+  if (user.activationToken) {
+    throw ApiError.badRequest('Account is not activated');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    throw ApiError.badRequest('Wrong password');
+  }
+
+  await generateTokens(res, user);
 };
 
 const refresh = async (req, res) => {
@@ -79,7 +76,7 @@ const refresh = async (req, res) => {
   const token = await tokenService.getByToken(refreshToken);
 
   if (!userData || !token) {
-    throw ApiError.unathorized();
+    throw ApiError.unauthorized();
   }
 
   const user = await userService.findByEmail(userData.email);
@@ -106,12 +103,18 @@ const logout = async (req, res) => {
   const userData = await jwtService.verifyRefresh(refreshToken);
 
   if (!userData || !refreshToken) {
-    throw ApiError.unathorized();
+    throw ApiError.unauthorized();
   }
 
   await tokenService.remove(userData.id);
 
-  res.sendStatus(204);
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true,
+  });
+
+  return res.redirect(process.env.CLIENT_HOST + '/login');
 };
 
 const resetRequest = async (req, res) => {

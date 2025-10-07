@@ -27,7 +27,7 @@ userRouter.patch(
 
 userRouter.get(
   '/me/reset-email/:token',
-  authMiddleware,
+
   catchError(userController.confirmEmailChange),
 );
 

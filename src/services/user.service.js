@@ -13,8 +13,8 @@ function getAllActivated() {
   });
 }
 
-function normalize({ id, email }) {
-  return { id, email };
+function normalize({ id, email, name }) {
+  return { id, email, name };
 }
 
 function findByEmail(email) {
@@ -24,7 +24,7 @@ function findByEmail(email) {
 async function updateName(name, userId) {
   const user = await User.findByPk(userId);
 
-  if (!userId) {
+  if (!user) {
     throw ApiError.badRequest('User not found');
   }
 

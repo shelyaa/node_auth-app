@@ -20,6 +20,16 @@ function validatePassword(value) {
   }
 }
 
-const userValidation = { validateEmail, validatePassword };
+function validateName(value) {
+  if (!value) {
+    return 'Name is required';
+  }
+
+  if (value.length < 4) {
+    return 'Name should be at least 4 characters';
+  }
+}
+
+const userValidation = { validateEmail, validatePassword, validateName };
 
 module.exports = { userValidation };

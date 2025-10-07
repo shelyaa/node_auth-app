@@ -1,16 +1,15 @@
 'use strict';
 require('dotenv').config({ path: '../.env' });
+require('./models/user');
 
 const { createServer } = require('./createServer');
-const { client } = require('./utils/db');
-
-require('./models/user');
+const { sequelize } = require('./utils/db');
 
 (async () => {
   try {
-    await client.authenticate();
+    await sequelize.authenticate();
 
-    await client.sync({ alter: true });
+    await sequelize.sync({ alter: true });
 
     createServer().listen(5700, () => {});
   } catch (error) {}

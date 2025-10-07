@@ -1,6 +1,5 @@
-
-const { client } = require('./src/utils/db');
+const { sequelize } = require('./src/utils/db');
 
 require('./src/models/user.js');
 
-client.sync({ force: true });
+sequelize.sync({ force: true });

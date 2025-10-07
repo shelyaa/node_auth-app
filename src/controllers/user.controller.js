@@ -59,8 +59,13 @@ const requestEmailChange = async (req, res) => {
   const { password, newEmail } = req.body;
   const userId = req.user.id;
 
-  if (!password) {
-    throw ApiError.badRequest('All fields are required');
+  const errors = {
+    email: userValidation.validateEmail(newEmail),
+    password: userValidation.validatePassword(password),
+  };
+
+  if (errors.email || errors.password) {
+    throw ApiError.badRequest('Bad request', errors);
   }
 
   await userService.updateEmailRequest(password, userId, newEmail);
