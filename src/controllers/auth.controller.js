@@ -10,15 +10,12 @@ const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   const errors = {
+    name: userValidation.validateName(name),
     email: userValidation.validateEmail(email),
     password: userValidation.validatePassword(password),
   };
 
-  if (!name) {
-    throw ApiError.badRequest('Name is required');
-  }
-
-  if (errors.email || errors.password) {
+  if (errors.email || errors.password || errors.name) {
     throw ApiError.badRequest('Bad request', errors);
   }
 
@@ -67,6 +64,8 @@ const login = async (req, res) => {
   }
 
   await generateTokens(res, user);
+
+  return res.redirect(process.env.CLIENT_HOST + '/profile');
 };
 
 const refresh = async (req, res) => {
@@ -100,7 +99,7 @@ async function generateTokens(res, user) {
 
 const logout = async (req, res) => {
   const { refreshToken } = req.cookies;
-  const userData = await jwtService.verifyRefresh(refreshToken);
+  const userData = jwtService.verifyRefresh(refreshToken);
 
   if (!userData || !refreshToken) {
     throw ApiError.unauthorized();
@@ -110,8 +109,6 @@ const logout = async (req, res) => {
 
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    sameSite: 'none',
-    secure: true,
   });
 
   return res.redirect(process.env.CLIENT_HOST + '/login');

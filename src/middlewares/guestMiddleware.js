@@ -1,18 +1,26 @@
-import { ApiError } from '../exeptions/api.error.js';
-import jwtService from '../services/jwt.service.js';
+const { ApiError } = require('../exeptions/api.error');
+const { jwtService } = require('../services/jwt.service');
 
-export const isGuest = async (req, res, next) => {
-  const { refreshToken } = req.cookies;
+const isGuest = async (req, res, next) => {
+  try {
+    const authHeader = req.headers['authorization'];
 
-  if (refreshToken) {
-    try {
-      await jwtService.verifyRefresh(refreshToken);
-
-      return next(ApiError.badRequest('You are already logged in'));
-    } catch (err) {
+    if (!authHeader) {
       return next();
     }
-  }
 
-  next();
+    const [, token] = authHeader.split(' ');
+
+    if (!token) {
+      return next();
+    }
+
+    jwtService.verifyRefresh(token);
+
+    return next(ApiError.badRequest('You are already logged in'));
+  } catch (err) {
+    return next();
+  }
 };
+
+module.exports = { isGuest };
