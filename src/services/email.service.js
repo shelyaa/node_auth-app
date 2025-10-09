@@ -1,6 +1,7 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
-require('dotenv').config();
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -11,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-function send({ email, subject, html }) {
+export function send({ email, subject, html }) {
   return transporter.sendMail({
     from: 'Auth API',
     to: email,
@@ -21,7 +22,7 @@ function send({ email, subject, html }) {
   });
 }
 
-function sendActivationEmail(email, token) {
+export function sendActivationEmail(email, token) {
   const href = `${process.env.CLIENT_HOST}/activate/${token}`;
   const html = `
   <h1>Activation account</h1>
@@ -31,7 +32,7 @@ function sendActivationEmail(email, token) {
   return send({ email, html, subject: 'Activate' });
 }
 
-function sendResetPasswordEmail(email, token) {
+export function sendResetPasswordEmail(email, token) {
   const href = `${process.env.CLIENT_HOST}/reset-password/${token}`;
   const html = `
   <h1>Reset password</h1>
@@ -41,7 +42,7 @@ function sendResetPasswordEmail(email, token) {
   return send({ email, html, subject: 'Reset password' });
 }
 
-function sendEmailChangeToken(email, token) {
+export function sendEmailChangeToken(email, token) {
   const href = `${process.env.CLIENT_HOST}/change-email/${token}`;
   const html = `
     <h1>Зміна email</h1>
@@ -52,14 +53,3 @@ function sendEmailChangeToken(email, token) {
 
   return send({ email, html, subject: 'Підтвердження зміни email' });
 }
-
-const emailService = {
-  send,
-  sendActivationEmail,
-  sendResetPasswordEmail,
-  sendEmailChangeToken,
-};
-
-module.exports = {
-  emailService,
-};

@@ -1,9 +1,9 @@
-'use strict';
-require('dotenv').config({ path: '../.env' });
-require('./models/user');
+import dotenv from 'dotenv';
+import './models/user.js';
+import { createServer } from './createServer.js';
+import { sequelize } from './utils/db.js';
 
-const { createServer } = require('./createServer');
-const { sequelize } = require('./utils/db');
+dotenv.config({ path: '../.env' });
 
 (async () => {
   try {

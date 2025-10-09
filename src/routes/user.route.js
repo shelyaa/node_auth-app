@@ -1,36 +1,31 @@
-const express = require('express');
-const { userController } = require('../controllers/user.controller.js');
-const { authMiddleware } = require('../middlewares/authMiddleware.js');
-const { catchError } = require('../utils/catchError.js');
+/* eslint-disable max-len */
+import express from 'express';
+import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { catchError } from '../utils/catchError.js';
+import { getAllActivated } from '../controllers/user/getAllActivated.controller.js';
+import {
+  confirmEmailChange,
+  requestEmailChange,
+  updateName,
+  updatePassword,
+} from '../controllers/user/update.controller.js';
 
-const userRouter = express.Router();
+export const userRouter = express.Router();
 
-userRouter.get('/users', authMiddleware, userController.getAllActivated);
+userRouter.get('/users', authMiddleware, catchError(getAllActivated));
 
-userRouter.patch(
-  '/me/name',
-  authMiddleware,
-  catchError(userController.updateName),
-);
+userRouter.patch('/me/name', authMiddleware, catchError(updateName));
 
 userRouter.patch(
   '/me/reset-password',
   authMiddleware,
-  catchError(userController.updatePassword),
+  catchError(updatePassword),
 );
 
 userRouter.patch(
   '/me/reset-email',
   authMiddleware,
-  catchError(userController.requestEmailChange),
+  catchError(requestEmailChange),
 );
 
-userRouter.get(
-  '/me/reset-email/:token',
-
-  catchError(userController.confirmEmailChange),
-);
-
-module.exports = {
-  userRouter,
-};
+userRouter.get('/me/reset-email/:token', catchError(confirmEmailChange));

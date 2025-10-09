@@ -1,26 +1,33 @@
-const { ApiError } = require('../exeptions/api.error');
-const { jwtService } = require('../services/jwt.service');
+import { ApiError } from '../exeptions/api.error.js';
+import { jwtService } from '../services/jwt.service.js';
 
-const isGuest = async (req, res, next) => {
-  try {
-    const authHeader = req.headers['authorization'];
+export const isGuest = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const refreshToken = req.cookies?.refreshToken;
 
-    if (!authHeader) {
-      return next();
-    }
-
-    const [, token] = authHeader.split(' ');
-
-    if (!token) {
-      return next();
-    }
-
-    jwtService.verifyRefresh(token);
-
-    return next(ApiError.badRequest('You are already logged in'));
-  } catch (err) {
+  if (!authHeader && !refreshToken) {
     return next();
   }
-};
 
-module.exports = { isGuest };
+  if (authHeader?.startsWith('Bearer ')) {
+    const [, accessToken] = authHeader.split(' ');
+
+    if (accessToken) {
+      const accessData = jwtService.verify(accessToken);
+
+      if (accessData) {
+        return next(ApiError.badRequest('You are already logged in'));
+      }
+    }
+  }
+
+  if (refreshToken) {
+    const refreshData = jwtService.verifyRefresh(refreshToken);
+
+    if (refreshData) {
+      return next(ApiError.badRequest('You are already logged in'));
+    }
+  }
+
+  return next();
+};

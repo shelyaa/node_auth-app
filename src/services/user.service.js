@@ -1,9 +1,10 @@
-const { User } = require('../models/user.js');
-const { v4: uuidv4 } = require('uuid');
-const { emailService } = require('./email.service');
-const { ApiError } = require('../exeptions/api.error');
-const bcrypt = require('bcrypt');
-const { Token } = require('../models/token.js');
+import { User } from '../models/user.js';
+import { v4 as uuidv4 } from 'uuid';
+import * as emailService from './email.service.js';
+import { ApiError } from '../exeptions/api.error.js';
+import bcrypt from 'bcrypt';
+import { Token } from '../models/token.js';
+import { validatePassword } from './userValidation.service.js';
 
 function getAllActivated() {
   return User.findAll({
@@ -170,6 +171,22 @@ const resetPasswordService = async (token, newPassword) => {
     throw ApiError.badRequest('Invalid or expired token');
   }
 
+  if (
+    !tokenRecord.resetTokenExpires ||
+    tokenRecord.resetTokenExpires < new Date()
+  ) {
+    tokenRecord.resetToken = null;
+    tokenRecord.resetTokenExpires = null;
+    await tokenRecord.save();
+    throw ApiError.badRequest('Reset token expired');
+  }
+
+  const passwordError = validatePassword(newPassword);
+
+  if (passwordError) {
+    throw ApiError.badRequest(passwordError);
+  }
+
   const user = tokenRecord.User;
 
   user.password = await bcrypt.hash(newPassword, 10);
@@ -182,7 +199,7 @@ const resetPasswordService = async (token, newPassword) => {
   return { message: 'Password reset successfully' };
 };
 
-const userService = {
+export const userService = {
   getAllActivated,
   normalize,
   findByEmail,
@@ -193,8 +210,4 @@ const userService = {
   createPasswordResetToken,
   resetPasswordService,
   updateEmailConfirmation,
-};
-
-module.exports = {
-  userService,
 };

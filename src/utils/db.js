@@ -1,6 +1,6 @@
-const { Sequelize } = require('sequelize');
+import { Sequelize } from 'sequelize';
 
-const sequelize = new Sequelize(
+export const sequelize = new Sequelize(
   process.env.PGDATABASE,
   process.env.PGUSER,
   process.env.PGPASSWORD,
@@ -8,7 +8,7 @@ const sequelize = new Sequelize(
     host: process.env.PGHOST,
     dialect: 'postgres',
     port: process.env.PGPORT,
-    dialectModule: require('pg'),
+    // dialectModule: require('pg'),
     dialectOptions: {
       ssl: {
         require: true,
@@ -18,5 +18,3 @@ const sequelize = new Sequelize(
     logging: false,
   },
 );
-
-module.exports = { sequelize };

@@ -1,7 +1,7 @@
-const { ApiError } = require('../exeptions/api.error');
-const { jwtService } = require('../services/jwt.service');
+import { ApiError } from '../exeptions/api.error.js';
+import { jwtService } from '../services/jwt.service.js';
 
-const authMiddleware = (req, res, next) => {
+export const authMiddleware = (req, res, next) => {
   const authorization = req.headers['authorization'] || '';
   const [, token] = authorization.split(' ');
 
@@ -18,8 +18,4 @@ const authMiddleware = (req, res, next) => {
   req.user = userData;
 
   next();
-};
-
-module.exports = {
-  authMiddleware,
 };

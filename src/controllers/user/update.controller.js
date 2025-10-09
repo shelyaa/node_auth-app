@@ -1,14 +1,11 @@
-const { ApiError } = require('../exeptions/api.error.js');
-const { userService } = require('../services/user.service.js');
-const { userValidation } = require('../services/userValidation.service.js');
+import { ApiError } from '../../exeptions/api.error.js';
+import { userService } from '../../services/user.service.js';
+import {
+  validateEmail,
+  validatePassword,
+} from '../../services/userValidation.service.js';
 
-const getAllActivated = async (req, res) => {
-  const users = await userService.getAllActivated();
-
-  res.send(users.map(userService.normalize));
-};
-
-const updateName = async (req, res) => {
+export const updateName = async (req, res) => {
   const { name } = req.body;
 
   if (!name) {
@@ -25,7 +22,7 @@ const updateName = async (req, res) => {
   });
 };
 
-const updatePassword = async (req, res) => {
+export const updatePassword = async (req, res) => {
   const { oldPassword, newPassword, confirmation } = req.body;
   const userId = req.user.id;
 
@@ -37,7 +34,7 @@ const updatePassword = async (req, res) => {
     throw ApiError.badRequest('Passwords do not match');
   }
 
-  const passwordError = userValidation.validatePassword(newPassword);
+  const passwordError = validatePassword(newPassword);
 
   if (passwordError) {
     throw ApiError.badRequest(passwordError);
@@ -55,13 +52,13 @@ const updatePassword = async (req, res) => {
   });
 };
 
-const requestEmailChange = async (req, res) => {
+export const requestEmailChange = async (req, res) => {
   const { password, newEmail } = req.body;
   const userId = req.user.id;
 
   const errors = {
-    email: userValidation.validateEmail(newEmail),
-    password: userValidation.validatePassword(password),
+    email: validateEmail(newEmail),
+    password: validatePassword(password),
   };
 
   if (errors.email || errors.password) {
@@ -75,7 +72,7 @@ const requestEmailChange = async (req, res) => {
   });
 };
 
-const confirmEmailChange = async (req, res) => {
+export const confirmEmailChange = async (req, res) => {
   const { token } = req.params;
 
   await userService.updateEmailConfirmation(token);
@@ -84,13 +81,3 @@ const confirmEmailChange = async (req, res) => {
     message: 'Email changed successfully',
   });
 };
-
-const userController = {
-  getAllActivated,
-  updateName,
-  updatePassword,
-  confirmEmailChange,
-  requestEmailChange,
-};
-
-module.exports = { userController };

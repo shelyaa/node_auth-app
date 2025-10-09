@@ -1,4 +1,4 @@
-function validateEmail(value) {
+export function validateEmail(value) {
   if (!value) {
     return 'Email is required';
   }
@@ -10,7 +10,7 @@ function validateEmail(value) {
   }
 }
 
-function validatePassword(value) {
+export function validatePassword(value) {
   if (!value) {
     return 'Password is required';
   }
@@ -20,7 +20,7 @@ function validatePassword(value) {
   }
 }
 
-function validateName(value) {
+export function validateName(value) {
   if (!value) {
     return 'Name is required';
   }
@@ -29,7 +29,3 @@ function validateName(value) {
     return 'Name should be at least 4 characters';
   }
 }
-
-const userValidation = { validateEmail, validatePassword, validateName };
-
-module.exports = { userValidation };
